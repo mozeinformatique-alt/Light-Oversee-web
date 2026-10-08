@@ -1,921 +1,311 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Light Oversee - Contrôle d'éclairage LED</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <style>
-        :root {
-            --bg-dark: #0a0b0e;
-            --card-bg: #13151b;
-            --modal-bg: #121318;
-            --accent-gold: #ffd000;
-            --accent-gold-dark: #d4a000;
-            --text-main: #f8f9fa;
-            --text-muted: #8e95a5;
-            --border-gold: rgba(255, 208, 0, 0.35);
-            --border-subtle: rgba(255, 255, 255, 0.08);
-            --radius-pill: 30px;
-            --radius-card: 18px;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-        }
-
-        body {
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            line-height: 1.5;
-            overflow-x: hidden;
-        }
-
-        /* Navigation */
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 8%;
-            background: rgba(10, 11, 14, 0.9);
-            backdrop-filter: blur(12px);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            border-bottom: 1px solid var(--border-subtle);
-        }
-
-        .logo-container {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            text-decoration: none;
-        }
-
-        .logo-img {
-            width: 42px;
-            height: 42px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 0 12px rgba(255, 208, 0, 0.2);
-        }
-
-        .logo-text {
-            font-size: 1.3rem;
-            font-weight: 800;
-            color: #fff;
-            letter-spacing: -0.5px;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-            list-style: none;
-        }
-
-        .nav-links a {
-            color: var(--text-muted);
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 0.95rem;
-            transition: color 0.3s;
-        }
-
-        .nav-links a:hover {
-            color: var(--text-main);
-        }
-
-        .btn-gold {
-            background: var(--accent-gold);
-            color: #000;
-            padding: 0.7rem 1.5rem;
-            border-radius: var(--radius-pill);
-            text-decoration: none;
-            font-weight: 700;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.2s ease;
-            border: none;
-            cursor: pointer;
-            font-size: 0.95rem;
-        }
-
-        .btn-gold:hover {
-            background: #ffe052;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 20px rgba(255, 208, 0, 0.4);
-        }
-
-        /* Hero Section */
-        .hero {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            align-items: center;
-            padding: 3.5rem 8%;
-            gap: 4rem;
-            min-height: calc(100vh - 80px);
-        }
-
-        .hero-title {
-            font-size: 3.2rem;
-            font-weight: 800;
-            line-height: 1.15;
-            margin-bottom: 1.2rem;
-        }
-
-        .hero-title span {
-            color: var(--accent-gold);
-        }
-
-        .hero-desc {
-            color: var(--text-muted);
-            font-size: 1.05rem;
-            margin-bottom: 2rem;
-            max-width: 500px;
-        }
-
-        /* Simulateur LED */
-        .led-preview-box {
-            background: #000;
-            border: 1px solid var(--border-gold);
-            padding: 16px;
-            border-radius: var(--radius-card);
-            margin-bottom: 2rem;
-            box-shadow: 0 0 25px rgba(255, 208, 0, 0.1);
-        }
-
-        .led-preview-header {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            margin-bottom: 10px;
-            text-transform: uppercase;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-        }
-
-        .led-strip {
-            display: flex;
-            justify-content: space-between;
-            gap: 6px;
-        }
-
-        .led-dot {
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            background: #ffd000;
-            box-shadow: 0 0 10px #ffd000, 0 0 18px #ffd000;
-            transition: all 0.2s ease;
-        }
-
-        /* Mockup Téléphone */
-        .phone-wrapper {
-            display: flex;
-            justify-content: center;
-        }
-
-        .phone-frame {
-            width: 350px;
-            height: 680px;
-            background: #000;
-            border: 10px solid #1c1e24;
-            border-radius: 44px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 0 40px rgba(255, 208, 0, 0.15);
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .phone-modal {
-            background: var(--modal-bg);
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            padding: 20px 16px 12px;
-            position: relative;
-        }
-
-        .status-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.8rem;
-            color: #fff;
-            margin-bottom: 12px;
-            font-weight: 600;
-            padding: 0 4px;
-        }
-
-        .modal-title {
-            color: var(--accent-gold);
-            font-size: 1.3rem;
-            font-weight: 800;
-        }
-
-        .modal-subtitle {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            margin-bottom: 14px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        /* Composants App */
-        .state-card {
-            background: #1a180e;
-            border: 1px solid var(--border-gold);
-            border-radius: var(--radius-card);
-            padding: 12px 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-
-        .state-label {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-weight: 700;
-            font-size: 0.9rem;
-        }
-
-        .toggle-switch {
-            width: 50px;
-            height: 28px;
-            background: #333;
-            border-radius: 20px;
-            position: relative;
-            cursor: pointer;
-            border: 1px solid var(--border-gold);
-        }
-
-        .toggle-switch.active {
-            background: var(--accent-gold);
-        }
-
-        .toggle-switch::after {
-            content: '';
-            position: absolute;
-            top: 2px;
-            left: 2px;
-            width: 22px;
-            height: 22px;
-            background: #fff;
-            border-radius: 50%;
-            transition: transform 0.2s;
-        }
-
-        .toggle-switch.active::after {
-            transform: translateX(22px);
-        }
-
-        .brightness-box {
-            margin-bottom: 14px;
-        }
-
-        .brightness-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.85rem;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-
-        .custom-slider {
-            width: 100%;
-            accent-color: var(--accent-gold);
-            cursor: pointer;
-        }
-
-        /* Onglets */
-        .tab-selector {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            border: 1px solid var(--border-gold);
-            border-radius: var(--radius-pill);
-            overflow: hidden;
-            margin-bottom: 14px;
-        }
-
-        .tab-btn {
-            background: transparent;
-            border: none;
-            color: #fff;
-            padding: 8px;
-            font-size: 0.85rem;
-            font-weight: 700;
-            cursor: pointer;
-        }
-
-        .tab-btn.active {
-            background: rgba(255, 255, 255, 0.15);
-        }
-
-        /* Vue Couleur */
-        .wheel-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .color-wheel {
-            width: 160px;
-            height: 160px;
-            border-radius: 50%;
-            position: relative;
-            cursor: pointer;
-            box-shadow: 0 0 15px rgba(0,0,0,0.5);
-        }
-
-        .color-preview-bar {
-            width: 100%;
-            height: 22px;
-            border-radius: 8px;
-            border: 1px solid var(--border-gold);
-            background: #a828e0;
-            box-shadow: 0 0 10px #a828e0;
-        }
-
-        .quick-colors {
-            display: flex;
-            gap: 6px;
-            margin-top: 6px;
-        }
-
-        .q-color {
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            background: #222;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #666;
-            font-size: 0.75rem;
-            cursor: pointer;
-        }
-
-        /* Vue Animations */
-        .anim-search {
-            background: #181a20;
-            border: 1px solid var(--border-gold);
-            border-radius: var(--radius-pill);
-            padding: 8px 14px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            margin-bottom: 10px;
-        }
-
-        .anim-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-
-        .anim-pill {
-            background: #181a20;
-            border: 1px solid var(--border-gold);
-            border-radius: var(--radius-pill);
-            padding: 8px 10px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            cursor: pointer;
-            color: #fff;
-        }
-
-        .anim-pill.active {
-            background: rgba(255, 208, 0, 0.15);
-            border-color: var(--accent-gold);
-        }
-
-        .anim-pill i {
-            color: #f72585;
-        }
-
-        /* Bottom Nav App */
-        .bottom-nav {
-            margin-top: auto;
-            display: flex;
-            justify-content: space-around;
-            padding-top: 10px;
-            border-top: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            font-size: 0.7rem;
-            color: var(--text-muted);
-            cursor: pointer;
-            gap: 3px;
-        }
-
-        .nav-item.active {
-            color: var(--accent-gold);
-        }
-
-        /* Vue Thèmes */
-        .theme-list {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            overflow-y: auto;
-            max-height: 320px;
-        }
-
-        .theme-card {
-            background: #181a20;
-            border: 1px solid var(--border-gold);
-            border-radius: 12px;
-            padding: 10px 12px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            cursor: pointer;
-        }
-
-        .theme-icon {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: #0088ff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
-            font-size: 0.85rem;
-        }
-
-        /* Section Fonctionnalités */
-        .features-section {
-            padding: 5rem 8%;
-            background: var(--card-bg);
-        }
-
-        .section-title {
-            text-align: center;
-            font-size: 2.2rem;
-            font-weight: 800;
-            margin-bottom: 3rem;
-        }
-
-        .grid-3 {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 2rem;
-        }
-
-        .card {
-            background: var(--bg-dark);
-            border: 1px solid var(--border-subtle);
-            padding: 2rem;
-            border-radius: var(--radius-card);
-            transition: border-color 0.3s;
-        }
-
-        .card:hover {
-            border-color: var(--accent-gold);
-        }
-
-        .card-icon {
-            font-size: 1.8rem;
-            color: var(--accent-gold);
-            margin-bottom: 1rem;
-        }
-
-        /* Section Mise à jour */
-        .update-box {
-            padding: 5rem 8%;
-        }
-
-        .step-list {
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-            max-width: 700px;
-            margin: 2rem auto 0;
-        }
-
-        .step-item {
-            display: flex;
-            gap: 1.5rem;
-            align-items: flex-start;
-            background: var(--card-bg);
-            padding: 1.5rem;
-            border-radius: var(--radius-card);
-            border: 1px solid var(--border-subtle);
-        }
-
-        .step-num {
-            background: var(--accent-gold);
-            color: #000;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 800;
-            flex-shrink: 0;
-        }
-
-        footer {
-            padding: 2.5rem 8%;
-            text-align: center;
-            color: var(--text-muted);
-            border-top: 1px solid var(--border-subtle);
-            font-size: 0.9rem;
-        }
-
-        @media (max-width: 900px) {
-            .hero {
-                grid-template-columns: 1fr;
-                text-align: center;
-            }
-            .hero-desc {
-                margin: 0 auto 2rem;
-            }
-        }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Light Oversee | Contrôle d'éclairage LED & WLED</title>
+<meta name="description" content="Application Android ultime pour piloter vos bandeaux LED, configurations WLED et modules ESP32.">
+<meta name="theme-color" content="#ffffff">
+<link rel="icon" href="ic_launcher.webp">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root{
+  box-sizing:border-box;color-scheme:light;
+  --bg:#fff;--soft:#f7f8fc;--navy:#12151e;--text:#12151e;--muted:#5d6b7b;
+  --gold:#ffd000;--gold-dark:#d4a000;--line:#e2e8f0;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*,*::before,*::after{box-sizing:inherit;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth;scroll-padding-top:90px}
+body{margin:0;background:var(--bg);color:var(--text);font-family:"Exo 2",-apple-system,"Segoe UI",Arial,sans-serif;-webkit-font-smoothing:antialiased;line-height:1.55}
+a{color:inherit;text-decoration:none}
+button,input,textarea{font:inherit;color:inherit;-webkit-appearance:none;appearance:none}
+:focus-visible{outline:3px solid var(--gold-dark);outline-offset:3px;border-radius:10px}
+::-webkit-scrollbar{width:10px}::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:10px;border:2px solid #fff}
+
+/* Navigation Flottante */
+nav{position:fixed;top:calc(14px + env(safe-area-inset-top,0px));left:0;right:0;z-index:30;display:flex;justify-content:center;padding:0 14px}
+.bar{display:flex;align-items:center;gap:26px;background:rgba(255,255,255,.88);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid var(--line);border-radius:999px;padding:7px 7px 7px 16px;box-shadow:0 8px 30px -12px rgba(18,21,30,.15);font-size:14px;font-weight:500}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px;line-height:1.1}
+.logo img{width:36px;height:36px;border-radius:50%;object-fit:cover}
+.logo small{display:block;font-weight:600;font-size:10px;color:var(--gold-dark);letter-spacing:.02em}
+.bar ul{display:flex;gap:22px;list-style:none;margin:0;padding:0;color:var(--muted)}
+.bar ul a:hover{color:var(--text)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;cursor:pointer;font-weight:600;background:var(--navy);color:#fff;padding:11px 22px;border-radius:999px;transition:transform .25s,box-shadow .25s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 10px 24px -10px rgba(18,21,30,.4)}
+.btn.gold{background:linear-gradient(100deg,var(--gold),var(--gold-dark));color:#000;font-weight:700}
+.btn.light{background:#fff;color:var(--navy);border:1px solid var(--line)}
+
+/* Hero Section avec particules Canvas */
+.hero{position:relative;min-height:100vh;min-height:100svh;display:flex;align-items:center;justify-content:center;text-align:center;padding:120px 22px 80px;overflow:hidden;background:radial-gradient(60% 50% at 50% 38%,#fffbeb 0%,#fff 70%)}
+#c{position:absolute;inset:0;width:100%;height:100%}
+.hero .in{position:relative;max-width:820px}
+.hero .mark{display:block;margin:0 auto 18px;width:min(110px,25vw);height:auto;border-radius:50%;box-shadow:0 10px 25px rgba(212,160,0,0.3);animation:rise .9s both}
+h1{font-size:clamp(38px,7vw,70px);line-height:1.06;letter-spacing:-.03em;font-weight:700;margin:0 0 20px;animation:rise .9s .1s both}
+h1 span{color:var(--gold-dark)}
+.hero p{font-size:clamp(17px,2.2vw,20px);color:var(--muted);max-width:32em;margin:0 auto 32px;animation:rise .9s .2s both}
+.cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;animation:rise .9s .3s both}
+.cta .btn{padding:15px 28px;font-size:16px}
+@keyframes rise{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+
+section{padding:90px 22px}
+.wrap{max-width:1080px;margin:auto}
+h2{font-size:clamp(28px,4.2vw,44px);letter-spacing:-.025em;line-height:1.1;margin:0 0 14px;font-weight:700}
+.lead{color:var(--muted);font-size:18px;max-width:32em;margin:0 0 40px}
+.center{text-align:center}.center .lead{margin-inline:auto}
+.soft{background:var(--soft)}
+
+/* Grilles & Cartes d'aperçu */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px}
+.card{background:#fff;border:1px solid var(--line);border-radius:24px;padding:28px;transition:transform .4s cubic-bezier(.2,.7,.2,1),box-shadow .4s}
+.card:hover{transform:translateY(-6px);box-shadow:0 20px 40px -20px rgba(18,21,30,.15)}
+.ic{width:48px;height:48px;border-radius:16px;background:#fef9c3;display:grid;place-items:center;margin-bottom:20px;color:var(--gold-dark);font-size:20px}
+.card h3{margin:0 0 8px;font-size:20px}
+.card p{margin:0;color:var(--muted);font-size:15px}
+
+/* Preview Section : Bandeau LED & App Screens */
+.preview-container{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px;margin-top:30px}
+.preview-card{background:#0d0e12;color:#fff;border-radius:24px;padding:24px;border:1px solid rgba(255,208,0,0.3);box-shadow:0 15px 35px rgba(0,0,0,0.2)}
+.preview-card h3{color:var(--gold);margin-top:0;font-size:1.2rem;display:flex;align-items:center;gap:10px}
+
+/* Simulation statique du bandeau LED */
+.led-strip-static{display:flex;justify-content:space-between;gap:8px;padding:16px;background:#000;border-radius:16px;margin:15px 0;border:1px solid rgba(255,255,255,0.1)}
+.led-node{width:16px;height:16px;border-radius:50%;background:#ffd000;box-shadow:0 0 10px #ffd000, 0 0 18px #ffd000}
+.led-node.rainbow-1{background:#f72585;box-shadow:0 0 10px #f72585}
+.led-node.rainbow-2{background:#4cc9f0;box-shadow:0 0 10px #4cc9f0}
+.led-node.rainbow-3{background:#10b981;box-shadow:0 0 10px #10b981}
+
+/* App Screens Statiques */
+.screen-mock{background:#161822;border-radius:18px;padding:16px;border:1px solid rgba(255,255,255,0.08);margin-top:12px}
+.screen-mock .header-mock{display:flex;justify-content:space-between;font-size:0.85rem;color:var(--gold);font-weight:700;margin-bottom:12px}
+.badge-tag{background:rgba(255,208,0,0.15);color:var(--gold);padding:4px 10px;border-radius:999px;font-size:0.75rem;border:1px solid rgba(255,208,0,0.3)}
+
+/* Etapes Mises à jour */
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px}
+.step{padding:4px 0 4px 20px;border-left:3px solid var(--gold-dark)}
+.step h3{margin:0 0 6px;font-size:19px}.step p{margin:0;color:var(--muted);font-size:14.5px}
+
+/* Menu Mobile */
+.burger-btn{display:none;align-items:center;justify-content:center;background:none;border:0;padding:6px;cursor:pointer;color:var(--navy);border-radius:10px}
+.burger-btn svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;display:block}
+.burger-btn .c-ic{display:none}
+.burger-btn.open .b-ic{display:none}
+.burger-btn.open .c-ic{display:block}
+.mob-nav{display:none;position:absolute;top:calc(100% + 8px);left:14px;right:14px;max-width:400px;margin:auto;background:rgba(255,255,255,.96);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid var(--line);border-radius:20px;padding:8px;box-shadow:0 14px 35px -10px rgba(18,21,30,.2);list-style:none;flex-direction:column;gap:3px;z-index:40}
+.mob-nav.open{display:flex;animation:rise .25s both}
+.mob-nav a{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-radius:14px;font-size:15px;font-weight:600;color:var(--navy)}
+
+footer{padding:34px 22px;text-align:center;color:var(--muted);font-size:13.5px;border-top:1px solid var(--line)}
+
+@media(max-width:768px){
+  .bar ul{display:none}
+  .burger-btn{display:inline-flex}
+  .bar{gap:8px;padding:5px 6px 5px 12px}
+  .logo{gap:8px;font-size:15px}
+  .logo img{width:30px;height:30px}
+}
+</style>
 </head>
 <body>
 
-    <!-- Header -->
-    <header>
-        <a href="#" class="logo-container">
-            <img src="ic_launcher.webp" alt="Light Oversee" class="logo-img" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'40\' height=\'40\' viewBox=\'0 0 40 40\'><circle cx=\'20\' cy=\'20\' r=\'20\' fill=\'%23ffd000\'/></svg>'">
-            <span class="logo-text">Light Oversee</span>
-        </a>
-        <ul class="nav-links">
-            <li><a href="#demo">Démo</a></li>
-            <li><a href="#features">Fonctionnalités</a></li>
-            <li><a href="#maj">Mises à jour</a></li>
-        </ul>
-        <a href="LightOversee.apk" download="LightOversee.apk" class="btn-gold">
-            <i class="fa-solid fa-download"></i> Télécharger APK
-        </a>
-    </header>
+<!-- Navigation Flottante -->
+<nav>
+  <div class="bar">
+    <a class="logo" href="#top">
+      <img src="ic_launcher.webp" alt="Logo Light Oversee" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'36\' height=\'36\' viewBox=\'0 0 36 36\'><circle cx=\'18\' cy=\'18\' r=\'18\' fill=\'%23ffd000\'/></svg>'">
+      <span>Light Oversee<small>Contrôle LED & WLED</small></span>
+    </a>
+    <ul>
+      <li><a href="#apercu">Aperçu</a></li>
+      <li><a href="#features">Fonctionnalités</a></li>
+      <li><a href="#maj">Mises à jour APK</a></li>
+    </ul>
+    <a class="btn gold" href="LightOversee.apk" download="LightOversee.apk">
+      <i class="fa-solid fa-download"></i> APK
+    </a>
+    <button class="burger-btn" id="burgerBtn" type="button" aria-label="Menu navigation">
+      <svg class="b-ic" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      <svg class="c-ic" viewBox="0 0 24 24"><path d="M6 6l12 12M6 18L18 6"/></svg>
+    </button>
+  </div>
+  <div class="mob-nav" id="mobNav">
+    <a href="#apercu">Aperçu</a>
+    <a href="#features">Fonctionnalités</a>
+    <a href="#maj">Mises à jour APK</a>
+  </div>
+</nav>
 
-    <!-- Hero -->
-    <section class="hero">
-        <div>
-            <h1 class="hero-title">Le contrôle total sur <span>vos éclairages LED</span>.</h1>
-            <p class="hero-desc">
-                Contrôlez vos modules ESP32, WLED et bandes ARGB avec une interface sombre, fluide et sur-mesure.
-            </p>
+<main id="top">
+<!-- Hero Section -->
+<header class="hero">
+  <canvas id="c" aria-hidden="true"></canvas>
+  <div class="in">
+    <img class="mark" src="ic_launcher.webp" alt="Light Oversee Logo" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'80\' height=\'80\' viewBox=\'0 0 80 80\'><circle cx=\'40\' cy=\'40\' r=\'40\' fill=\'%23ffd000\'/></svg>'">
+    <h1>Contrôlez vos <span>Bandeaux LED</span> en toute simplicité.</h1>
+    <p>L'application Android moderne pour piloter vos installations ARGB, cartes ESP32 et firmwares WLED. Une interface fluide et sans latence.</p>
+    <div class="cta">
+      <a class="btn gold" href="LightOversee.apk" download="LightOversee.apk">
+        <i class="fa-brands fa-android"></i> Télécharger Light Oversee (.APK)
+      </a>
+      <a class="btn light" href="#apercu">Découvrir les visuels</a>
+    </div>
+  </div>
+</header>
 
-            <div class="led-preview-box">
-                <div class="led-preview-header">
-                    <span>État de la bande LED (Simulation)</span>
-                    <span id="led-status">30% - ALLUMÉ</span>
-                </div>
-                <div class="led-strip" id="topLedStrip">
-                    <div class="led-dot"></div><div class="led-dot"></div>
-                    <div class="led-dot"></div><div class="led-dot"></div>
-                    <div class="led-dot"></div><div class="led-dot"></div>
-                    <div class="led-dot"></div><div class="led-dot"></div>
-                    <div class="led-dot"></div><div class="led-dot"></div>
-                    <div class="led-dot"></div><div class="led-dot"></div>
-                </div>
-            </div>
+<!-- Aperçu du Bandeau LED et de l'App -->
+<section id="apercu" class="soft">
+  <div class="wrap center">
+    <h2>Aperçu du matériel et de l'interface</h2>
+    <p class="lead">Visuels de la télécommande Android et rendu du ruban LED synchrone.</p>
 
-            <a href="LightOversee.apk" download="LightOversee.apk" class="btn-gold" style="font-size: 1.05rem; padding: 0.9rem 2rem;">
-                <i class="fa-brands fa-android"></i> Obtenir la dernière version
-            </a>
+    <div class="preview-container">
+      <!-- Aperçu Bandeau LED -->
+      <div class="preview-card">
+        <h3><i class="fa-solid fa-lightbulb"></i> Rendu Bandeau LED ARGB</h3>
+        <p style="color: #94a3b8; font-size: 0.9rem;">Exemples d'animations et d'éclairage fixe pris en charge.</p>
+        
+        <div style="text-align: left; margin-top: 15px;">
+          <span class="badge-tag">Mode Fixe - Jaune Chaud</span>
+          <div class="led-strip-static">
+            <div class="led-node"></div><div class="led-node"></div><div class="led-node"></div><div class="led-node"></div><div class="led-node"></div><div class="led-node"></div>
+          </div>
+
+          <span class="badge-tag">Mode Animation - Arc-en-ciel</span>
+          <div class="led-strip-static">
+            <div class="led-node rainbow-1"></div><div class="led-node rainbow-2"></div><div class="led-node rainbow-3"></div><div class="led-node rainbow-1"></div><div class="led-node rainbow-2"></div><div class="led-node rainbow-3"></div>
+          </div>
         </div>
+      </div>
 
-        <!-- Démo interactive -->
-        <div class="phone-wrapper" id="demo">
-            <div class="phone-frame">
-                <div class="phone-modal">
-                    <div class="status-bar">
-                        <span>11:50</span>
-                        <div style="display: flex; gap: 6px;">
-                            <i class="fa-solid fa-wifi"></i>
-                            <i class="fa-solid fa-battery-full"></i>
-                        </div>
-                    </div>
-
-                    <h2 class="modal-title">Contrôle de l'éclairage</h2>
-                    <div class="modal-subtitle">
-                        Connecté à : <span style="color: #fff;">Light_Oversee_ESP32</span>
-                        <i class="fa-solid fa-wifi" style="color: var(--accent-gold); margin-left: auto;"></i>
-                    </div>
-
-                    <div class="state-card">
-                        <div class="state-label">
-                            <i class="fa-solid fa-tv" style="color: var(--accent-gold);"></i>
-                            État du bandeau
-                        </div>
-                        <div class="toggle-switch active" id="powerToggle"></div>
-                    </div>
-
-                    <div class="brightness-box">
-                        <div class="brightness-header">
-                            <span><i class="fa-solid fa-sun" style="color: var(--accent-gold); margin-right: 6px;"></i> Luminosité globale</span>
-                            <span id="brightVal">30%</span>
-                        </div>
-                        <input type="range" class="custom-slider" id="brightSlider" min="0" max="100" value="30">
-                    </div>
-
-                    <div class="tab-selector">
-                        <button class="tab-btn active" id="tabFixed" onclick="switchTab('fixed')">Couleur fixe</button>
-                        <button class="tab-btn" id="tabAnim" onclick="switchTab('anim')">Animations</button>
-                    </div>
-
-                    <div id="viewFixed" class="wheel-container">
-                        <canvas id="colorCanvas" width="160" height="160" class="color-wheel"></canvas>
-                        <div class="color-preview-bar" id="previewBar"></div>
-                        <div style="font-size: 0.75rem; color: var(--text-muted); width: 100%;">Couleurs rapides</div>
-                        <div class="quick-colors">
-                            <div class="q-color"><i class="fa-solid fa-plus"></i></div>
-                            <div class="q-color"><i class="fa-solid fa-plus"></i></div>
-                            <div class="q-color"><i class="fa-solid fa-plus"></i></div>
-                            <div class="q-color"><i class="fa-solid fa-plus"></i></div>
-                            <div class="q-color"><i class="fa-solid fa-plus"></i></div>
-                            <div class="q-color"><i class="fa-solid fa-plus"></i></div>
-                        </div>
-                    </div>
-
-                    <div id="viewAnim" style="display: none;">
-                        <div class="anim-search">
-                            <i class="fa-solid fa-magnifying-glass"></i>
-                            Rechercher une animation...
-                        </div>
-                        <div class="anim-grid">
-                            <div class="anim-pill active" onclick="setAnimation('Arc-en-ciel', this)"><i class="fa-solid fa-wifi"></i> Arc-en-ciel</div>
-                            <div class="anim-pill" onclick="setAnimation('Vague Océan', this)"><i class="fa-solid fa-circle-notch"></i> Vague Océan</div>
-                            <div class="anim-pill" onclick="setAnimation('Feu de cheminée', this)"><i class="fa-solid fa-fire"></i> Feu de cheminée</div>
-                            <div class="anim-pill" onclick="setAnimation('Aurore Boréale', this)"><i class="fa-solid fa-star"></i> Aurore Boréale</div>
-                            <div class="anim-pill" onclick="setAnimation('Pulsation Disco', this)"><i class="fa-solid fa-music"></i> Pulsation Disco</div>
-                            <div class="anim-pill" onclick="setAnimation('Comète', this)"><i class="fa-solid fa-meteor"></i> Comète</div>
-                        </div>
-                    </div>
-
-                    <div id="viewExplorer" style="display: none;">
-                        <div style="font-size: 0.9rem; font-weight: 800; color: var(--accent-gold); margin-bottom: 8px;">Choisir un thème</div>
-                        <div class="theme-list">
-                            <div class="theme-card">
-                                <div class="theme-icon" style="background: #0088ff;"><i class="fa-solid fa-lightbulb"></i></div>
-                                <div>
-                                    <div style="font-size: 0.85rem; font-weight: 700;">Bleu Oversee</div>
-                                    <div style="font-size: 0.7rem; color: var(--text-muted);">Thème moderne d'origine.</div>
-                                </div>
-                            </div>
-                            <div class="theme-card">
-                                <div class="theme-icon" style="background: #a828e0;"><i class="fa-solid fa-gamepad"></i></div>
-                                <div>
-                                    <div style="font-size: 0.85rem; font-weight: 700;">Néon Cyberpunk</div>
-                                    <div style="font-size: 0.7rem; color: var(--text-muted);">Inspiré des néons futuristes.</div>
-                                </div>
-                            </div>
-                            <div class="theme-card">
-                                <div class="theme-icon" style="background: #ff5500;"><i class="fa-solid fa-sun"></i></div>
-                                <div>
-                                    <div style="font-size: 0.85rem; font-weight: 700;">Coucher de Soleil</div>
-                                    <div style="font-size: 0.7rem; color: var(--text-muted);">Nuances d'orange et corail.</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="bottom-nav">
-                        <div class="nav-item active" id="navAppareil" onclick="setNav('appareil')">
-                            <i class="fa-solid fa-tv"></i>
-                            Appareil
-                        </div>
-                        <div class="nav-item" id="navExplorer" onclick="setNav('explorer')">
-                            <i class="fa-solid fa-compass"></i>
-                            Explorer
-                        </div>
-                        <div class="nav-item">
-                            <i class="fa-solid fa-user"></i>
-                            Profil
-                        </div>
-                    </div>
-                </div>
-            </div>
+      <!-- Aperçu Interface Android -->
+      <div class="preview-card">
+        <h3><i class="fa-solid fa-mobile-screen"></i> Télécommande Light Oversee</h3>
+        <p style="color: #94a3b8; font-size: 0.9rem;">Captures de l'interface utilisateur en Dark Mode.</p>
+        
+        <div class="screen-mock">
+          <div class="header-mock">
+            <span>Contrôle de l'éclairage</span>
+            <span>ESP32 Wi-Fi</span>
+          </div>
+          <div style="background: rgba(255,208,0,0.1); border: 1px solid rgba(255,208,0,0.3); padding: 10px; border-radius: 12px; font-size: 0.85rem; color: #fff; text-align: left; margin-bottom: 8px;">
+            <i class="fa-solid fa-power-off" style="color: var(--gold);"></i> État du bandeau : <strong>ALLUMÉ (30%)</strong>
+          </div>
+          <div style="background: #121318; border: 1px solid rgba(255,255,255,0.05); padding: 10px; border-radius: 12px; font-size: 0.8rem; color: #94a3b8; text-align: left;">
+            <i class="fa-solid fa-palette"></i> Modes : Couleur fixe, Arc-en-ciel, Feu de cheminée, Vague Océan.
+          </div>
         </div>
-    </section>
+      </div>
+    </div>
+  </div>
+</section>
 
-    <!-- Features -->
-    <section class="features-section" id="features">
-        <h2 class="section-title">Fonctionnalités Clés</h2>
-        <div class="grid-3">
-            <div class="card">
-                <div class="card-icon"><i class="fa-solid fa-microchip"></i></div>
-                <h3>Contrôle WLED & C++</h3>
-                <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 8px;">
-                    Compatible avec vos microcontrôleurs ESP32 et ESP8266 pour une réactivité instantanée via Wi-Fi.
-                </p>
-            </div>
-            <div class="card">
-                <div class="card-icon"><i class="fa-solid fa-palette"></i></div>
-                <h3>Thèmes Personnalisables</h3>
-                <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 8px;">
-                    Changez le look complet de votre application grâce aux thèmes intégrés dans l'onglet Explorer.
-                </p>
-            </div>
-            <div class="card">
-                <div class="card-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
-                <h3>Animations & Effets</h3>
-                <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 8px;">
-                    Basculez d'une couleur fixe aux effets dynamiques (Arc-en-ciel, Feu de cheminée, Pulsation).
-                </p>
-            </div>
-        </div>
-    </section>
+<!-- Fonctionnalités -->
+<section id="features">
+  <div class="wrap center">
+    <h2>Fonctionnalités principales</h2>
+    <p class="lead">Tout ce qu'il vous faut pour gérer vos éclairages au même endroit.</p>
 
-    <!-- Mises à jour -->
-    <section class="update-box" id="maj">
-        <h2 class="section-title">Mise à jour sans perte de données</h2>
-        <p style="text-align: center; color: var(--text-muted); max-width: 600px; margin: 0 auto;">
-            Vous avez déjà installé Light Oversee ? Voici comment mettre à jour l'application en conservant tous vos réglages, appareils et thèmes sans devoir repartir de zéro.
-        </p>
+    <div class="grid">
+      <div class="card">
+        <div class="ic"><i class="fa-solid fa-microchip"></i></div>
+        <h3>Compatibilité ESP32 & WLED</h3>
+        <p>Connexion rapide à vos modules Wi-Fi ESP32 / ESP8266 exécutant WLED ou du code C++ sur-mesure.</p>
+      </div>
+      <div class="card">
+        <div class="ic"><i class="fa-solid fa-palette"></i></div>
+        <h3>Roue Chromatique RVB</h3>
+        <p>Sélection exacte des teintes et ajustement précis de la luminosité globale en temps réel.</p>
+      </div>
+      <div class="card">
+        <div class="ic"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+        <h3>Explorateur de Thèmes</h3>
+        <p>Personnalisez l'apparence de l'application selon vos goûts (Néon Cyberpunk, Bleu Oversee, etc.).</p>
+      </div>
+    </div>
+  </div>
+</section>
 
-        <div class="step-list">
-            <div class="step-item">
-                <div class="step-num">1</div>
-                <div>
-                    <strong style="color: #fff; font-size: 1.1rem;">Téléchargez le nouvel APK</strong>
-                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 4px;">
-                        Cliquez sur le bouton de téléchargement ci-dessous pour obtenir le dernier fichier `.apk` de Light Oversee.
-                    </p>
-                </div>
-            </div>
+<!-- Section Mises à jour sans perte de données -->
+<section id="maj" class="soft">
+  <div class="wrap">
+    <div class="center">
+      <h2>Installer ou Mettre à jour l'application</h2>
+      <p class="lead">Procédure pour conserver vos appareils et réglages sans tout réinstaller de zéro.</p>
+    </div>
 
-            <div class="step-item">
-                <div class="step-num">2</div>
-                <div>
-                    <strong style="color: #fff; font-size: 1.1rem;">Lancez l'installation directe</strong>
-                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 4px;">
-                        <strong>Ne désinstallez surtout pas l'ancienne application !</strong> Ouvrez directement le fichier APK téléchargé. Android reconnaîtra la mise à jour et vous proposera de cliquer sur <em>"Mettre à jour"</em>.
-                    </p>
-                </div>
-            </div>
+    <div class="steps" style="margin-top: 30px;">
+      <div class="step">
+        <h3>1. Téléchargez l'APK</h3>
+        <p>Cliquez sur le bouton pour obtenir le fichier de mise à jour <code>LightOversee.apk</code>.</p>
+      </div>
+      <div class="step">
+        <h3>2. Installez par-dessus</h3>
+        <p><strong>Ne désinstallez pas l'application actuelle.</strong> Ouvrez directement le fichier téléchargé pour valider la mise à jour.</p>
+      </div>
+      <div class="step">
+        <h3>3. Conservez vos données</h3>
+        <p>Android mettra à jour l'application tout en conservant vos configurations et appareils enregistrés.</p>
+      </div>
+    </div>
 
-            <div class="step-item">
-                <div class="step-num">3</div>
-                <div>
-                    <strong style="color: #fff; font-size: 1.1rem;">Conservez vos données automatiquement</strong>
-                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 4px;">
-                        Android mettra à jour le code de l'application tout en conservant vos préférences et configurations d'appareils intactes.
-                    </p>
-                </div>
-            </div>
-        </div>
+    <div style="text-align: center; margin-top: 40px;">
+      <a class="btn gold" href="LightOversee.apk" download="LightOversee.apk" style="padding: 16px 32px; font-size: 1.1rem;">
+        <i class="fa-solid fa-download"></i> Télécharger LightOversee.apk
+      </a>
+    </div>
+  </div>
+</section>
+</main>
 
-        <div style="text-align: center; margin-top: 3rem;" id="download">
-            <a href="LightOversee.apk" download="LightOversee.apk" class="btn-gold" style="font-size: 1.1rem; padding: 1rem 2.5rem;">
-                <i class="fa-solid fa-download"></i> Télécharger la dernière mise à jour (.APK)
-            </a>
-        </div>
-    </section>
+<footer>
+  <div>© 2026 Light Oversee · Application de contrôle d'éclairage LED & ESP32</div>
+</footer>
 
-    <footer>
-        <p><strong>Light Oversee</strong> &copy; 2026 — Conçu pour les passionnés d'éclairage LED & DIY.</p>
-    </footer>
+<!-- JavaScript des effets Canvas et Menu Mobile -->
+<script>
+var $=function(s,r){return(r||document).querySelector(s)};
 
-    <!-- Logic JS -->
-    <script>
-        let isPower = true;
-        let brightness = 30;
-        let currentColor = '#a828e0';
+/* Menu mobile */
+(function(){
+  var b=$('#burgerBtn'),m=$('#mobNav');
+  if(!b||!m)return;
+  function toggle(o){
+    var open=typeof o==='boolean'?o:!m.classList.contains('open');
+    m.classList.toggle('open',open);
+    b.classList.toggle('open',open);
+  }
+  b.onclick=function(e){e.stopPropagation();toggle()};
+  m.querySelectorAll('a').forEach(function(a){
+    a.onclick=function(){toggle(false)};
+  });
+  document.addEventListener('click',function(e){
+    if(!m.contains(e.target)&&!b.contains(e.target))toggle(false);
+  });
+})();
 
-        const powerToggle = document.getElementById('powerToggle');
-        const brightSlider = document.getElementById('brightSlider');
-        const brightVal = document.getElementById('brightVal');
-        const topLeds = document.querySelectorAll('.led-dot');
-        const ledStatus = document.getElementById('led-status');
-        const previewBar = document.getElementById('previewBar');
-
-        powerToggle.addEventListener('click', () => {
-            isPower = !isPower;
-            powerToggle.classList.toggle('active', isPower);
-            updateLeds();
-        });
-
-        brightSlider.addEventListener('input', (e) => {
-            brightness = e.target.value;
-            brightVal.textContent = brightness + '%';
-            updateLeds();
-        });
-
-        function switchTab(tab) {
-            document.getElementById('tabFixed').classList.toggle('active', tab === 'fixed');
-            document.getElementById('tabAnim').classList.toggle('active', tab === 'anim');
-            document.getElementById('viewFixed').style.display = tab === 'fixed' ? 'flex' : 'none';
-            document.getElementById('viewAnim').style.display = tab === 'anim' ? 'block' : 'none';
-        }
-
-        function setNav(nav) {
-            document.getElementById('navAppareil').classList.toggle('active', nav === 'appareil');
-            document.getElementById('navExplorer').classList.toggle('active', nav === 'explorer');
-            
-            if(nav === 'explorer') {
-                document.getElementById('viewFixed').style.display = 'none';
-                document.getElementById('viewAnim').style.display = 'none';
-                document.getElementById('viewExplorer').style.display = 'block';
-            } else {
-                document.getElementById('viewExplorer').style.display = 'none';
-                switchTab('fixed');
-            }
-        }
-
-        function setAnimation(name, el) {
-            document.querySelectorAll('.anim-pill').forEach(p => p.classList.remove('active'));
-            el.classList.add('active');
-            
-            if(name === 'Arc-en-ciel') {
-                topLeds.forEach((d, i) => {
-                    const h = (i * 30) % 360;
-                    d.style.backgroundColor = `hsl(${h}, 100%, 50%)`;
-                    d.style.boxShadow = `0 0 10px hsl(${h}, 100%, 50%)`;
-                });
-            } else {
-                updateLeds();
-            }
-        }
-
-        const canvas = document.getElementById('colorCanvas');
-        const ctx = canvas.getContext('2d');
-        const radius = canvas.width / 2;
-
-        function drawColorWheel() {
-            for (let angle = 0; angle < 360; angle += 1) {
-                const startAngle = (angle - 2) * Math.PI / 180;
-                const endAngle = (angle + 2) * Math.PI / 180;
-                ctx.beginPath();
-                ctx.moveTo(radius, radius);
-                ctx.arc(radius, radius, radius, startAngle, endAngle);
-                ctx.closePath();
-                ctx.fillStyle = `hsl(${angle}, 100%, 50%)`;
-                ctx.fill();
-            }
-            const grad = ctx.createRadialGradient(radius, radius, 0, radius, radius, radius);
-            grad.addColorStop(0, 'white');
-            grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
-            ctx.fillStyle = grad;
-            ctx.beginPath();
-            ctx.arc(radius, radius, radius, 0, Math.PI * 2);
-            ctx.fill();
-        }
-
-        canvas.addEventListener('click', (e) => {
-            const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            const pixel = ctx.getImageData(x, y, 1, 1).data;
-            currentColor = `rgb(${pixel[0]}, ${pixel[1]}, ${pixel[2]})`;
-            previewBar.style.backgroundColor = currentColor;
-            previewBar.style.boxShadow = `0 0 10px ${currentColor}`;
-            updateLeds();
-        });
-
-        function updateLeds() {
-            if(!isPower) {
-                topLeds.forEach(d => {
-                    d.style.backgroundColor = '#222';
-                    d.style.boxShadow = 'none';
-                });
-                ledStatus.textContent = 'ÉTEINT';
-                return;
-            }
-
-            const opacity = brightness / 100;
-            ledStatus.textContent = `${brightness}% - ALLUMÉ`;
-            topLeds.forEach(d => {
-                d.style.backgroundColor = currentColor;
-                d.style.boxShadow = `0 0 ${12 * opacity}px ${currentColor}`;
-                d.style.opacity = opacity;
-            });
-        }
-
-        drawColorWheel();
-        updateLeds();
-    </script>
+/* Particules dynamiques en arrière-plan (Canvas Hero) */
+(function(){
+  var c=$('#c'),x=c.getContext('2d'),P=[],W,H,d=Math.min(devicePixelRatio||1,2);
+  function size(){
+    W=c.clientWidth;H=c.clientHeight;c.width=W*d;c.height=H*d;x.setTransform(d,0,0,d,0,0);
+    P=[];
+    for(var i=0,n=Math.round(W*H/10000);i<n;i++){
+      P.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.3,r:Math.random()*1.8+.8});
+    }
+  }
+  function draw(){
+    x.clearRect(0,0,W,H);
+    P.forEach(function(p){
+      p.y-=.15; if(p.y<-5)p.y=H+5;
+      x.fillStyle='rgba(212,160,0,.3)';
+      x.beginPath();x.arc(p.x,p.y,p.r,0,6.283);x.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+  addEventListener('resize',size);
+  size();draw();
+})();
+</script>
 </body>
 </html>
